@@ -11,11 +11,11 @@ class Config:
     MONGO_URI = os.getenv('MONGO_URI', 'mongodb+srv://esenturk:Test_123@roomsense.mncac3o.mongodb.net/roomsense')
     
     # Email (SMTP)
-    SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', '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')
+    SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', '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')
     FROM_EMAIL = os.getenv('FROM_EMAIL','esenturk@ur.rochester.edu')
 
     # Application
-    BASE_URL = os.getenv('BASE_URL', 'http://localhost:8061')
+    BASE_URL = os.getenv('BASE_URL', 'https://roomsense-backend.onrender.com/')
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     
     # Session

@@ -167,25 +167,10 @@
             <div class="info-label">Your Unique ID</div>
             <div class="unique-number">{{ unique_number }}</div>
         </div>
-
         <a href="/" class="button">Go to Dashboard</a>
-
-        <p class="note">
-            Save your unique ID for future reference.<br>
-            This window will close automatically in 10 seconds.
+        <p class="note">Save your unique ID for future reference.<br>
         </p>
     </div>
 
-    <script>
-        // Auto-redirect after 10 seconds
-        setTimeout(() => {
-            window.location.href = '/';
-        }, 10000);
-
-        // Or close window if opened in new tab
-        // setTimeout(() => {
-        //     window.close();
-        // }, 10000);
-    </script>
 </body>
 </html>
