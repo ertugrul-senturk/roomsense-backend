@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  flask-app:
+    build: .
+    container_name: flask_roomsense
+    ports:
+      - "8061:8061"
+    environment:
+      - MONGO_URI=${MONGO_URI}
+      - MAIL_SERVER=${MAIL_SERVER}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - BASE_URL=${BASE_URL}
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - roomsense-network
+
+networks:
+  roomsense-network:
+    driver: bridge
