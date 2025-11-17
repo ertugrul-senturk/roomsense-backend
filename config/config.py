@@ -15,7 +15,7 @@ class Config:
     FROM_EMAIL = os.getenv('FROM_EMAIL','esenturk@ur.rochester.edu')
 
     # Application
-    BASE_URL = os.getenv('BASE_URL', 'https://roomsense-backend.onrender.com/')
+    BASE_URL = os.getenv('BASE_URL', 'https://roomsense-backend.onrender.com')
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     
     # Session
