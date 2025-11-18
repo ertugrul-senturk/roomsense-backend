@@ -8,11 +8,17 @@ from flask_mail import Mail
 from flask_cors import CORS
 from datetime import datetime
 import logging
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 
 from config import get_config
 from services.auth_service import AuthService
 from services.email_service import EmailService
 from routes.auth_routes import init_auth_routes
+from routes.session_routes import init_session_routes
+from services.sessions_service import SessionsService
 
 # Configure logging
 logging.basicConfig(
@@ -48,10 +54,13 @@ def create_app(config_name='development'):
     # Initialize services
     email_service = EmailService(app.config)
     auth_service = AuthService(mongo.db, email_service)
+    sessions_service = SessionsService(mongo.db)
     
     # Register blueprints (routes)
     auth_blueprint = init_auth_routes(auth_service)
     app.register_blueprint(auth_blueprint)
+    session_blueprint = init_session_routes(sessions_service)
+    app.register_blueprint(session_blueprint)
     
     # Health check endpoint
     @app.route('/health', methods=['GET'])
