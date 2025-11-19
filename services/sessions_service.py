@@ -2,6 +2,7 @@ import uuid
 import logging
 from models.sessions import SessionModel
 from models.user import User
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +58,7 @@ class SessionsService:
             return {"success": False, "message": "Session ID already exists"}
         
         payload["sessionId"] = session_id
+        payload["session_is_active"] = False
 
         try:
             saved_session = SessionModel.createSession(self.db, payload)
@@ -124,6 +126,7 @@ class SessionsService:
         """Update an existing session"""
         try:
             result = SessionModel.updateSession(self.db, sessionId, updateData)
+            
             if result.modified_count == 1:
                 return {
                     "success": True,
@@ -139,4 +142,78 @@ class SessionsService:
             return {
                 "success": False,
                 "message": "Failed to update session"
+            }
+        
+    def start_session(self, sessionId):
+        """Mark a session as active"""
+        try:
+            updateData = {
+                "session_is_active": True,
+                "session_actual_start_time": datetime.utcnow()
+            }
+            result = SessionModel.updateSession(self.db, sessionId, updateData)
+            
+            if result.modified_count == 1:
+                return {
+                    "success": True,
+                    "message": "Session started successfully"
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": "No changes made to the session"
+                }
+        except Exception as e:
+            logger.error(f"Error starting session: {str(e)}")
+            return {
+                "success": False,
+                "message": "Failed to start session"
+            }
+        
+    def end_session(self, sessionId):
+        """Mark a session as inactive"""
+        try:
+            updateData = {
+                "session_is_active": False,
+                "session_actual_end_time": datetime.utcnow()
+            }
+            result = SessionModel.updateSession(self.db, sessionId, updateData)
+            
+            if result.modified_count == 1:
+                return {
+                    "success": True,
+                    "message": "Session ended successfully"
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": "No changes made to the session"
+                }
+        except Exception as e:
+            logger.error(f"Error ending session: {str(e)}")
+            return {
+                "success": False,
+                "message": "Failed to end session"
+            }
+        
+    def delete_session(self, sessionId):
+        """Delete a session"""
+        try:
+            result = SessionModel.deleteSession(self.db, sessionId)
+            
+            if result.deleted_count == 1:
+                return {
+                    "success": True,
+                    "message": "Session deleted successfully"
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": "Session not found"
+                }
+        except Exception as e:
+            logger.error(f"Error deleting session: {str(e)}")
+            return {
+                "success": False,
+                "message": "Failed to delete session"
             }

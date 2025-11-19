@@ -55,18 +55,18 @@ def init_session_routes(sessions_service):
     def update_session():
         try:
             payload=request.get_json()
-            print("===================")
-            print("payload = ",payload)
-            print("===================")
+            # print("===================")
+            # print("payload = ",payload)
+            # print("===================")
 
             sessionId=payload.get('sessionId')
-            print("===================")
-            print("sessionId = ",sessionId)
-            print("===================")
+            # print("===================")
+            # print("sessionId = ",sessionId)
+            # print("===================")
             updateData=payload.get('updateData')
-            print("===================")
-            print("updateData = ",updateData)
-            print("===================")
+            # print("===================")
+            # print("updateData = ",updateData)
+            # print("===================")
 
             result=sessions_service.update_session(sessionId, updateData)
 
@@ -80,6 +80,63 @@ def init_session_routes(sessions_service):
             return jsonify({
                 'success': False,
                 'message': 'Failed to update session'
+            }), 500
+        
+    @session_bp.route('/start_session', methods=['POST'])
+    def start_session():
+        try:
+            payload=request.get_json()
+            sessionId=payload.get('sessionId')
+            result=sessions_service.start_session(sessionId)
+
+            if result['success']:
+                return jsonify(result), 200
+            else:
+                return jsonify(result), 400
+            
+        except Exception as e:
+            logger.error(f"Start session error: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': 'Failed to start session'
+            }), 500
+        
+    @session_bp.route('/end_session', methods=['POST'])
+    def end_session():
+        try:
+            payload=request.get_json()
+            sessionId=payload.get('sessionId')
+            result=sessions_service.end_session(sessionId)
+
+            if result['success']:
+                return jsonify(result), 200
+            else:
+                return jsonify(result), 400
+            
+        except Exception as e:
+            logger.error(f"End session error: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': 'Failed to end session'
+            }), 500
+        
+    @session_bp.route('/delete_session', methods=['POST'])
+    def delete_session():
+        try:
+            payload=request.get_json()
+            sessionId=payload.get('sessionId')
+            result=sessions_service.delete_session(sessionId)
+
+            if result['success']:
+                return jsonify(result), 200
+            else:
+                return jsonify(result), 400
+            
+        except Exception as e:
+            logger.error(f"Delete session error: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': 'Failed to delete session'
             }), 500
   
         

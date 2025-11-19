@@ -35,3 +35,8 @@ class SessionModel:
             {"$set": updateData}
         )
         return result
+    
+    @staticmethod
+    def deleteSession(db, sessionId):
+        result = db.sessions.delete_one({"sessionId": sessionId})
+        return result
