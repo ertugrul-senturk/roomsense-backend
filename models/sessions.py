@@ -30,6 +30,7 @@ class SessionModel:
     @staticmethod
     def updateSession(db, sessionId, updateData):
         updateData["updatedAt"] = datetime.utcnow()
+        updateData.pop('_id', None)  # Prevent updating the _id field if present
         result = db.sessions.update_one(
             {"sessionId": sessionId},
             {"$set": updateData}

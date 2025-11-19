@@ -122,21 +122,43 @@ class SessionsService:
                 "message": "Failed to retrieve sessions"
             }
     
+    def get_session_by_sessionId(self, sessionId):
+        """Retrieve a session by session ID"""
+        try:
+            session = SessionModel.findSessionBySessionId(self.db, sessionId)
+            if session:
+                return {
+                    "success": True,
+                    "session": session
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": "Session not found"
+                }
+        except Exception as e:
+            logger.error(f"Error retrieving session: {str(e)}")
+            return {
+                "success": False,
+                "message": "Failed to retrieve session"
+            }
+    
     def update_session(self, sessionId, updateData):
         """Update an existing session"""
         try:
             result = SessionModel.updateSession(self.db, sessionId, updateData)
             
-            if result.modified_count == 1:
-                return {
-                    "success": True,
-                    "message": "Session updated successfully"
-                }
-            else:
-                return {
-                    "success": False,
-                    "message": "No changes made to the session"
-                }
+            return result.modified_count >= 1
+            # if result.modified_count >= 1:
+            #     return {
+            #         "success": True,
+            #         "message": "Session updated successfully"
+            #     }
+            # else:
+            #     return {
+            #         "success": False,
+            #         "message": "No changes made to the session"
+            #     }
         except Exception as e:
             logger.error(f"Error updating session: {str(e)}")
             return {
