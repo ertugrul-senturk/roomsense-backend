@@ -193,27 +193,27 @@ class AuthService:
             }
         }
 
-    def check_login_status(self, email):
+    def check_login_status(self, unique_number):
         """
         Check if user is logged in (active)
 
         Args:
-            email: User's email address
+            unique_number: User's session token
 
         Returns:
             dict: Login status with user data if logged in
         """
-        if not email:
+        if not unique_number:
             return {
                 'loggedIn': False,
                 'email': None,
                 'uniqueNumber': None
             }
 
-        email = email.lower().strip()
+        unique_number = unique_number.strip()
 
-        # Find user
-        user = User.find_by_email(self.db, email)
+        # Find user by session token
+        user = User.find_by_unique_number(self.db, unique_number)
 
         if not user:
             return {

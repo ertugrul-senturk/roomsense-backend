@@ -104,26 +104,27 @@ def init_auth_routes(auth_service):
             else:
                 return render_template('templates/auth/verification_failed.html',
                                        reason=result['message'])
-    
-    
+
     @auth_bp.route('/status', methods=['GET'])
     def check_login_status():
         """
         Check if user is logged in
-        GET /auth/status
-        Header: Authorization: Bearer {sessionToken}
+        GET /auth/status?uniqueNumber={uniqueNumber}
         """
         try:
-            auth_header = request.headers.get('Authorization')
-            
-            session_token = None
-            if auth_header and auth_header.startswith('Bearer '):
-                session_token = auth_header[7:]
-            
-            result = auth_service.check_login_status(session_token)
-            
+            unique_number = request.args.get('uniqueNumber')
+
+            if not unique_number:
+                return jsonify({
+                    'loggedIn': False,
+                    'email': None,
+                    'uniqueNumber': None
+                }), 200
+
+            result = auth_service.check_login_status(unique_number)
+
             return jsonify(result), 200
-            
+
         except Exception as e:
             logger.error(f"Status check error: {str(e)}")
             return jsonify({
@@ -131,34 +132,36 @@ def init_auth_routes(auth_service):
                 'email': None,
                 'uniqueNumber': None
             }), 200
-    
-    
+
     @auth_bp.route('/logout', methods=['POST'])
     def logout():
         """
         Logout user
         POST /auth/logout
-        Header: Authorization: Bearer {sessionToken}
+        Body: { "email": "user@example.com" }
         """
         try:
-            auth_header = request.headers.get('Authorization')
-            
-            session_token = None
-            if auth_header and auth_header.startswith('Bearer '):
-                session_token = auth_header[7:]
-            
-            result = auth_service.logout(session_token)
-            
+            data = request.get_json()
+            email = data.get('email') if data else None
+
+            if not email:
+                return jsonify({
+                    'success': False,
+                    'message': 'Email is required'
+                }), 400
+
+            result = auth_service.logout(email)
+
             if result['success']:
                 return jsonify(result), 200
             else:
                 return jsonify(result), 400
-                
+
         except Exception as e:
             logger.error(f"Logout error: {str(e)}")
             return jsonify({
                 'success': False,
                 'message': 'Logout failed'
             }), 500
-    
+
     return auth_bp
