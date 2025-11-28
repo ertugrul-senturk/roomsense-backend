@@ -61,7 +61,6 @@ def create_app(config_name='development'):
     # Register blueprints (routes)
     auth_blueprint = init_auth_routes(auth_service)
     app.register_blueprint(auth_blueprint)
-    app.register_blueprint(session_blueprint)
     lecture_blueprint = init_lecture_routes(lecture_service)
     app.register_blueprint(lecture_blueprint)
     
