@@ -16,8 +16,9 @@ load_dotenv()
 from config import get_config
 from services.auth_service import AuthService
 from services.email_service import EmailService
+from services.lecture_service import LectureService
 from routes.auth_routes import init_auth_routes
-from routes.session_routes import init_session_routes
+from routes.lecture_routes import init_lecture_routes
 from services.sessions_service import SessionsService
 
 # Configure logging
@@ -55,12 +56,14 @@ def create_app(config_name='development'):
     email_service = EmailService(app.config)
     auth_service = AuthService(mongo.db, email_service)
     sessions_service = SessionsService(mongo.db)
+    lecture_service = LectureService(mongo.db)
     
     # Register blueprints (routes)
     auth_blueprint = init_auth_routes(auth_service)
     app.register_blueprint(auth_blueprint)
-    session_blueprint = init_session_routes(sessions_service)
     app.register_blueprint(session_blueprint)
+    lecture_blueprint = init_lecture_routes(lecture_service)
+    app.register_blueprint(lecture_blueprint)
     
     # Health check endpoint
     @app.route('/health', methods=['GET'])
@@ -76,14 +79,27 @@ def create_app(config_name='development'):
     def index():
         """API root endpoint"""
         return jsonify({
-            'message': 'RoomSense Authentication API',
-            'version': '1.0',
+            'message': 'RoomSense API',
+            'version': '2.0',
             'endpoints': {
-                'register': '/auth/register',
-                'login': '/auth/login',
-                'verify': '/auth/verify',
-                'status': '/auth/status',
-                'logout': '/auth/logout',
+                'auth': {
+                    'register': '/auth/register',
+                    'login': '/auth/login',
+                    'verify': '/auth/verify',
+                    'status': '/auth/status',
+                    'logout': '/auth/logout'
+                },
+                'lectures': {
+                    'create': 'POST /api/lectures/',
+                    'getByLecturer': 'GET /api/lectures/lecturer/<lecturer_id>',
+                    'getById': 'GET /api/lectures/<lecture_id>',
+                    'update': 'PUT /api/lectures/<lecture_id>',
+                    'delete': 'DELETE /api/lectures/<lecture_id>',
+                    'updateDay': 'PUT /api/lectures/<lecture_id>/day/<day_id>',
+                    'createQuestion': 'POST /api/lectures/<lecture_id>/questions',
+                    'getQuestions': 'GET /api/lectures/<lecture_id>/questions',
+                    'unansweredCount': 'GET /api/lectures/lecturer/<lecturer_id>/questions/unanswered/count'
+                },
                 'health': '/health'
             }
         }), 200

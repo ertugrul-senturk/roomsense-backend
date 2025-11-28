@@ -11,39 +11,7 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 def init_auth_routes(auth_service):
     """Initialize auth routes with service dependency"""
-    
-    @auth_bp.route('/register', methods=['POST'])
-    def register():
-        """
-        Register a new user
-        POST /auth/register
-        Body: {"email": "user@example.com"}
-        """
-        try:
-            data = request.get_json()
-            email = data.get('email')
-            
-            if not email:
-                return jsonify({
-                    'success': False,
-                    'message': 'Email is required'
-                }), 400
-            
-            result = auth_service.register(email)
-            
-            if result['success']:
-                return jsonify(result), 201
-            else:
-                return jsonify(result), 400
-                
-        except Exception as e:
-            logger.error(f"Registration error: {str(e)}")
-            return jsonify({
-                'success': False,
-                'message': 'Registration failed'
-            }), 500
-    
-    
+
     @auth_bp.route('/login', methods=['POST'])
     def login():
         """
@@ -54,6 +22,7 @@ def init_auth_routes(auth_service):
         try:
             data = request.get_json()
             email = data.get('email')
+            session_id = data.get('sessionId')
             
             if not email:
                 return jsonify({
@@ -61,7 +30,7 @@ def init_auth_routes(auth_service):
                     'message': 'Email is required'
                 }), 400
             
-            result = auth_service.login(email)
+            result = auth_service.login(email, session_id)
             
             if result['success']:
                 return jsonify(result), 200
@@ -78,50 +47,44 @@ def init_auth_routes(auth_service):
     @auth_bp.route('/verify')
     def verify():
         """Handle email verification from link"""
-        token = request.args.get('token')
+        session_id = request.args.get('sessionId')
 
-        if not token:
+        if not session_id:
             return render_template('auth/verification_failed.html',
                                    reason='No verification token provided')
 
         # Call auth service
-        result = auth_service.verify_email(token)
+        result = auth_service.verify_email(session_id)
 
         if result['success']:
             # Store user data in session
             session['email'] = result['data']['email']
-            session['uniqueNumber'] = result['data']['uniqueNumber']
             session['isActive'] = True
 
             return render_template('auth/verification_success.html',
-                                   email=result['data']['email'],
-                                   unique_number=result['data']['uniqueNumber'])
+                                   email=result['data']['email'])
         else:
             # Handle different error cases
             if result.get('redirect') == 'verification-expired':
-                return render_template('templates/auth/verification_expired.html',
+                return render_template('auth/verification_expired.html',
                                        message=result['message'])
             else:
-                return render_template('templates/auth/verification_failed.html',
+                return render_template('auth/verification_failed.html',
                                        reason=result['message'])
 
-    @auth_bp.route('/status', methods=['GET'])
+    @auth_bp.route('/status', methods=['POST'])
     def check_login_status():
-        """
-        Check if user is logged in
-        GET /auth/status?uniqueNumber={uniqueNumber}
-        """
         try:
-            unique_number = request.args.get('uniqueNumber')
+            data = request.get_json()
+            session_id = data.get('sessionId')
 
-            if not unique_number:
+            if not session_id:
                 return jsonify({
                     'loggedIn': False,
                     'email': None,
-                    'uniqueNumber': None
                 }), 200
 
-            result = auth_service.check_login_status(unique_number)
+            result = auth_service.check_login_status(session_id)
 
             return jsonify(result), 200
 
@@ -142,15 +105,15 @@ def init_auth_routes(auth_service):
         """
         try:
             data = request.get_json()
-            email = data.get('email') if data else None
+            sessionId = data.get('sessionId') if data else None
 
-            if not email:
+            if not sessionId:
                 return jsonify({
                     'success': False,
-                    'message': 'Email is required'
+                    'message': 'Session id is required'
                 }), 400
 
-            result = auth_service.logout(email)
+            result = auth_service.logout(sessionId)
 
             if result['success']:
                 return jsonify(result), 200

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verification Link Expired - RoomSense</title>
+    <title>Verification Failed - RoomSense</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -48,14 +48,14 @@
         .icon-container {
             width: 96px;
             height: 96px;
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 32px;
             animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
-            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
         }
 
         @keyframes scaleIn {
@@ -77,15 +77,17 @@
             fill: none;
             stroke-linecap: round;
             stroke-linejoin: round;
-            animation: fadeIn 0.4s ease 0.5s both;
+            animation: drawX 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
         }
 
-        @keyframes fadeIn {
+        @keyframes drawX {
             from {
-                opacity: 0;
+                stroke-dasharray: 100;
+                stroke-dashoffset: 100;
             }
             to {
-                opacity: 1;
+                stroke-dasharray: 100;
+                stroke-dashoffset: 0;
             }
         }
 
@@ -104,18 +106,19 @@
             line-height: 1.6;
         }
 
-        .message-box {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border: 1px solid #fbbf24;
+        .error-box {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border: 1px solid #f87171;
             border-radius: 16px;
             padding: 24px;
             margin: 24px 0;
         }
 
-        .message-box p {
-            color: #92400e;
+        .error-box p {
+            color: #991b1b;
             font-size: 15px;
             line-height: 1.6;
+            font-weight: 500;
         }
 
         .info-list {
@@ -161,42 +164,74 @@
 
         .info-list li:before {
             content: "•";
-            color: #f59e0b;
+            color: #ef4444;
             font-weight: bold;
             position: absolute;
             left: 8px;
         }
 
-        .button {
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .button-primary {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             color: white;
-            padding: 16px 48px;
+            padding: 16px 32px;
             border-radius: 12px;
             text-decoration: none;
             font-weight: 600;
             font-size: 16px;
-            margin-top: 24px;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+            flex: 1;
+            min-width: 180px;
         }
 
-        .button:hover {
+        .button-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.5);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.5);
         }
 
-        .button:active {
+        .button-primary:active {
             transform: translateY(0);
+        }
+
+        .button-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: white;
+            color: #374151;
+            padding: 16px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 2px solid #e5e7eb;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .button-secondary:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
         }
 
         .button svg {
             width: 20px;
             height: 20px;
-            stroke: white;
+            stroke: currentColor;
             stroke-width: 2;
             fill: none;
             stroke-linecap: round;
@@ -208,6 +243,16 @@
             font-size: 14px;
             margin-top: 32px;
             line-height: 1.6;
+        }
+
+        .note a {
+            color: #ef4444;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .note a:hover {
+            text-decoration: underline;
         }
 
         @media (max-width: 480px) {
@@ -222,6 +267,15 @@
             .subtitle {
                 font-size: 16px;
             }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .button-primary,
+            .button-secondary {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -230,43 +284,54 @@
         <div class="icon-container">
             <svg viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
             </svg>
         </div>
 
-        <h1>Verification Link Expired</h1>
-        <p class="subtitle">This verification link is no longer valid</p>
+        <h1>Verification Failed</h1>
+        <p class="subtitle">We couldn't verify your email address</p>
 
-        <div class="message-box">
+        <div class="error-box">
             <p>{{ message }}</p>
         </div>
 
         <div class="info-list">
             <h3>
                 <svg viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="12" y1="16" x2="12" y2="12"/>
-                    <line x1="12" y1="8" x2="12.01" y2="8"/>
-                </h3>
-                What you can do:
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                Common Issues:
             </h3>
             <ul>
-                <li>Request a new verification link from the login page</li>
-                <li>Check your email for the most recent verification link</li>
-                <li>Ensure you complete verification within the time limit</li>
+                <li>The verification link may have been used already</li>
+                <li>The link could be malformed or incomplete</li>
+                <li>Your account might already be verified</li>
+                <li>The verification token is invalid or corrupted</li>
             </ul>
         </div>
 
-        <a href="/" class="button">
-            <svg viewBox="0 0 24 24">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-            Request New Link
-        </a>
+        <div class="button-group">
+            <a href="/" class="button-primary">
+                <svg viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                Try Again
+            </a>
+            
+            <a href="/support" class="button-secondary">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                Get Help
+            </a>
+        </div>
 
         <p class="note">
-            Need help? Contact our support team for assistance.
+            If the problem persists, please <a href="mailto:support@roomsense.com">contact support</a><br>
+            or try requesting a new verification link.
         </p>
     </div>
 </body>

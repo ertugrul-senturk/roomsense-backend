@@ -12,30 +12,32 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .container {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
             max-width: 500px;
             width: 100%;
-            padding: 50px 40px;
+            padding: 48px 40px;
             text-align: center;
-            animation: slideUp 0.5s ease;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(40px);
             }
             to {
                 opacity: 1;
@@ -43,36 +45,41 @@
             }
         }
 
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .icon-container {
+            width: 96px;
+            height: 96px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 30px;
-            animation: scaleIn 0.5s ease 0.2s both;
+            margin: 0 auto 32px;
+            animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
         }
 
         @keyframes scaleIn {
             from {
                 transform: scale(0);
+                opacity: 0;
             }
             to {
                 transform: scale(1);
+                opacity: 1;
             }
         }
 
-        .success-icon svg {
-            width: 50px;
-            height: 50px;
+        .icon-container svg {
+            width: 56px;
+            height: 56px;
             stroke: white;
             stroke-width: 3;
             fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
             stroke-dasharray: 100;
             stroke-dashoffset: 100;
-            animation: drawCheck 0.5s ease 0.5s forwards;
+            animation: drawCheck 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
         }
 
         @keyframes drawCheck {
@@ -82,95 +89,153 @@
         }
 
         h1 {
-            color: #333;
+            color: #111827;
             font-size: 32px;
-            margin-bottom: 15px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
         }
 
         .subtitle {
-            color: #666;
+            color: #6b7280;
             font-size: 18px;
-            margin-bottom: 30px;
+            margin-bottom: 32px;
+            line-height: 1.6;
         }
 
         .info-box {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 30px 0;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            border: 1px solid #d1d5db;
         }
 
         .info-label {
-            color: #999;
-            font-size: 14px;
+            color: #6b7280;
+            font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 5px;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
 
         .info-value {
-            color: #333;
+            color: #111827;
             font-size: 18px;
-            font-weight: bold;
-        }
-
-        .unique-number {
-            font-size: 28px;
-            color: #667eea;
-            letter-spacing: 3px;
-            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            word-break: break-all;
         }
 
         .button {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 15px 40px;
-            border-radius: 25px;
+            padding: 16px 48px;
+            border-radius: 12px;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 16px;
-            margin-top: 20px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            margin-top: 24px;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
         }
 
         .button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button svg {
+            width: 20px;
+            height: 20px;
+            stroke: white;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .note {
-            color: #999;
+            color: #9ca3af;
             font-size: 14px;
-            margin-top: 30px;
+            margin-top: 32px;
+            line-height: 1.6;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #dcfce7;
+            color: #166534;
+            padding: 8px 16px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 24px;
+        }
+
+        .badge svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 32px 24px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .subtitle {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="success-icon">
+        <div class="icon-container">
             <svg viewBox="0 0 52 52">
                 <polyline points="14,26 22,34 38,18"/>
             </svg>
         </div>
 
-        <h1>Email Verified! 🎉</h1>
-        <p class="subtitle">Welcome to RoomSense</p>
+        <h1>Email Verified Successfully</h1>
+        <p class="subtitle">Your account has been activated and you're ready to get started with RoomSense</p>
 
         <div class="info-box">
-            <div class="info-label">Your Email</div>
+            <div class="info-label">Verified Email Address</div>
             <div class="info-value">{{ email }}</div>
         </div>
 
-        <div class="info-box">
-            <div class="info-label">Your Unique ID</div>
-            <div class="unique-number">{{ unique_number }}</div>
+        <div class="badge">
+            <svg viewBox="0 0 24 24">
+                <path d="M9 12l2 2 4-4"/>
+                <circle cx="12" cy="12" r="10"/>
+            </svg>
+            Account Active
         </div>
-        <a href="/" class="button">Go to Dashboard</a>
-        <p class="note">Save your unique ID for future reference.<br>
+
+        <p class="note">
+            You can now access all features of RoomSense.<br>
+            Start creating sessions and managing your classroom today.
         </p>
     </div>
-
 </body>
 </html>
