@@ -3,17 +3,24 @@ Lecture Service
 Business logic for lecture management
 """
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 
 from models.lecture import Lecture, StudentQuestion
 from models.user import User
+import random
+import string
 
 logger = logging.getLogger(__name__)
+
+def generate_random(size: int) -> str:
+    chars = string.ascii_letters + string.digits
+    return ''.join(random.choice(chars) for _ in range(size))
 
 
 class LectureService:
     """Service for managing lectures and student questions"""
+    QUESTION_COOLDOWN_SECONDS = 30
     
     def __init__(self, db):
         """
@@ -65,6 +72,7 @@ class LectureService:
             
             # Create lecture document
             lecture_doc = Lecture.create(
+                key= generate_random(6),
                 lecturer_id=user['_id'],
                 course_name=course_name,
                 semester_start=semester_start,
@@ -103,12 +111,12 @@ class LectureService:
             logger.error(f"Error fetching lectures for session {session_id}: {str(e)}")
             raise
     
-    def get_lecture_by_id(self, session_id, lecture_id):
+    def get_lecture_by_key(self, session_id, lecture_key):
         """
         Get a specific lecture by ID
         
         Args:
-            lecture_id: Lecture ID (string)
+            lecture_key: Lecture Key (string)
             session_id: Session ID (string)
             
         Returns:
@@ -116,19 +124,19 @@ class LectureService:
         """
         self.verify_and_get_user(session_id)
         try:
-            lecture = self.lectures.find_one({'_id': ObjectId(lecture_id)})
+            lecture = self.lectures.find_one({'key': lecture_key})
             return Lecture.to_json(lecture) if lecture else None
         except Exception as e:
-            logger.error(f"Error fetching lecture {lecture_id}: {str(e)}")
+            logger.error(f"Error fetching lecture {lecture_key}: {str(e)}")
             raise
     
-    def update_lecture(self, session_id, lecture_id, updates):
+    def update_lecture(self, session_id, lecture_key, updates):
         self.verify_and_get_user(session_id)
         """
         Update a lecture
         
         Args:
-            lecture_id: Lecture ID (string)
+            lecture_key: Lecture Key (string)
             session_id: Session ID (string)
             updates: Dictionary of fields to update
             
@@ -153,25 +161,25 @@ class LectureService:
                         raise ValueError(f"Invalid lecture day: {day}")
             
             result = self.lectures.find_one_and_update(
-                {'_id': ObjectId(lecture_id)},
+                {'key': lecture_key},
                 {'$set': updates},
                 return_document=True
             )
             
-            logger.info(f"Updated lecture: {lecture_id}")
+            logger.info(f"Updated lecture: {lecture_key}")
             
             return Lecture.to_json(result) if result else None
 
         except Exception as e:
-            logger.error(f"Error updating lecture {lecture_id}: {str(e)}")
+            logger.error(f"Error updating lecture {lecture_key}: {str(e)}")
             raise
     
-    def update_lecture_day(self, session_id, lecture_id,day_id, day_updates):
+    def update_lecture_day(self, session_id, lecture_key, day_id, day_updates):
         """
         Update a specific lecture day within a lecture
         
         Args:
-            lecture_id: Lecture ID (string)
+            lecture_key: Lecture Key (string)
             session_id: Session ID (string)
             day_id: Lecture day ID (string)
             day_updates: Dictionary of day fields to update
@@ -188,7 +196,7 @@ class LectureService:
                         raise ValueError(f"Invalid timeline item: {item}")
 
             # Find the lecture
-            lecture = self.lectures.find_one({'_id': ObjectId(lecture_id)})
+            lecture = self.lectures.find_one({'key': lecture_key})
             if not lecture:
                 return None
             
@@ -207,7 +215,7 @@ class LectureService:
             
             # Update the lecture
             result = self.lectures.find_one_and_update(
-                {'_id': ObjectId(lecture_id)},
+                {'key': lecture_key},
                 {
                     '$set': {
                         'lectureDays': lecture_days,
@@ -217,7 +225,7 @@ class LectureService:
                 return_document=True
             )
             
-            logger.info(f"Updated lecture day {day_id} in lecture {lecture_id}")
+            logger.info(f"Updated lecture day {day_id} in lecture {lecture_key}")
             
             return Lecture.to_json(result) if result else None
             
@@ -225,12 +233,12 @@ class LectureService:
             logger.error(f"Error updating lecture day: {str(e)}")
             raise
     
-    def delete_lecture(self, session_id, lecture_id):
+    def delete_lecture(self, session_id, lecture_key):
         """
         Delete a lecture (with verification that it belongs to the lecturer)
         
         Args:
-            lecture_id: Lecture ID (string)
+            lecture_key: Lecture Key (string)
             session_id: Lecturer's user ID (string)
             
         Returns:
@@ -239,30 +247,30 @@ class LectureService:
         user = self.verify_and_get_user(session_id)
         try:
             result = self.lectures.delete_one({
-                '_id': ObjectId(lecture_id),
+                'key': lecture_key,
                 'lecturerId': user['_id']
             })
             
             if result.deleted_count > 0:
                 # Also delete associated questions
-                self.questions.delete_many({'lectureId': lecture_id})
-                logger.info(f"Deleted lecture: {lecture_id}")
+                self.questions.delete_many({'lectureKey': lecture_key})
+                logger.info(f"Deleted lecture: {lecture_key}")
                 return True
             
             return False
             
         except Exception as e:
-            logger.error(f"Error deleting lecture {lecture_id}: {str(e)}")
+            logger.error(f"Error deleting lecture {lecture_key}: {str(e)}")
             raise
     
     # Student Questions
     
-    def create_question(self, lecture_id, student_name, question_text):
+    def create_question(self, lecture_key, student_name, question_text):
         """
         Create a student question
         
         Args:
-            lecture_id: Lecture ID (string)
+            lecture_key: Lecture Key (string)
             student_name: Student's name
             question_text: Question content
             
@@ -271,7 +279,7 @@ class LectureService:
         """
         try:
             question_doc = StudentQuestion.create(
-                lecture_id=lecture_id,
+                lecture_key=lecture_key,
                 student_name=student_name,
                 question=question_text
             )
@@ -279,7 +287,7 @@ class LectureService:
             result = self.questions.insert_one(question_doc)
             question_doc['_id'] = result.inserted_id
             
-            logger.info(f"Created question for lecture: {lecture_id}")
+            logger.info(f"Created question for lecture: {lecture_key}")
             
             return StudentQuestion.to_json(question_doc)
             
@@ -287,12 +295,12 @@ class LectureService:
             logger.error(f"Error creating question: {str(e)}")
             raise
     
-    def get_questions_by_lecture(self, session_id, lecture_id):
+    def get_questions_by_lecture(self, session_id, lecture_key):
         """
         Get all questions for a specific lecture
         
         Args:
-            lecture_id: Lecture ID (string)
+            lecture_key: Lecture ID (string)
             session_id: Session ID (string)
             
         Returns:
@@ -300,10 +308,10 @@ class LectureService:
         """
         self.verify_and_get_user(session_id)
         try:
-            questions = list(self.questions.find({'lectureId': lecture_id}))
+            questions = list(self.questions.find({'lectureKey': lecture_key}))
             return [StudentQuestion.to_json(q) for q in questions]
         except Exception as e:
-            logger.error(f"Error fetching questions for lecture {lecture_id}: {str(e)}")
+            logger.error(f"Error fetching questions for lecture {lecture_key}: {str(e)}")
             raise
     
     def get_unanswered_questions_count(self, session_id):
@@ -357,4 +365,73 @@ class LectureService:
             return result.modified_count > 0
         except Exception as e:
             logger.error(f"Error marking question {question_id} as answered: {str(e)}")
+            raise
+
+
+
+    def get_next_question_for_lecture(self, session_id, lecture_key):
+        """
+        Get the next new question for a lecture, respecting cooldown and
+        ensuring each question is only returned once.
+
+        Rules:
+        - Endpoint is called every ~3 seconds.
+        - Return at most ONE question at a time.
+        - Each question can only be returned once (isDelivered flag).
+        - After a question is fetched, the next one must wait 30 seconds
+          before it can be delivered, even if it was already created.
+        """
+        # Ensure the session is valid (also implicitly ensures that only
+        # authorized lecturer can pull questions if you enforce that)
+        self.verify_and_get_user(session_id)
+
+        now = datetime.utcnow()
+
+        try:
+            # 1) Find the last delivered question for this lecture
+            last_delivered = self.questions.find_one(
+                {
+                    'lectureKey': lecture_key,
+                    'isDelivered': True,
+                    'deliveredAt': {'$ne': None}
+                },
+                sort=[('deliveredAt', -1)]
+            )
+
+            # 2) Enforce 30-second cooldown per lecture
+            if last_delivered is not None:
+                delivered_at = last_delivered.get('deliveredAt')
+                if delivered_at is not None:
+                    next_allowed_time = delivered_at + timedelta(seconds=self.QUESTION_COOLDOWN_SECONDS)
+                    if now < next_allowed_time:
+                        # Still in cooldown window: do not return any question
+                        return None
+
+            # 3) Atomically pick the oldest undelivered question and mark it delivered
+            #    This ensures each question can only be returned once.
+            next_question = self.questions.find_one_and_update(
+                {
+                    'lectureKey': lecture_key,
+                    'isDelivered': False
+                },
+                {
+                    '$set': {
+                        'isDelivered': True,
+                        'deliveredAt': now
+                    }
+                },
+                sort=[('createdAt', 1)],
+                return_document=True
+            )
+
+            if not next_question:
+                # No undelivered questions exist
+                return None
+
+            return StudentQuestion.to_json(next_question)
+
+        except Exception as e:
+            logger.error(
+                f"Error fetching next question for lecture {lecture_key}: {str(e)}"
+            )
             raise

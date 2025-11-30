@@ -112,13 +112,13 @@ def init_lecture_routes(lecture_service):
                 'message': 'Failed to fetch lectures'
             }), 500
     
-    @blueprint.route('/<session_id>/<lecture_id>', methods=['GET'])
-    def get_lecture(session_id, lecture_id):
+    @blueprint.route('/<session_id>/<lecture_key>', methods=['GET'])
+    def get_lecture(session_id, lecture_key):
         """
         Get a specific lecture by ID
         """
         try:
-            lecture = lecture_service.get_lecture_by_id(session_id, lecture_id)
+            lecture = lecture_service.get_lecture_by_key(session_id, lecture_key)
             
             if not lecture:
                 return jsonify({
@@ -138,8 +138,8 @@ def init_lecture_routes(lecture_service):
                 'message': 'Failed to fetch lecture'
             }), 500
     
-    @blueprint.route('/<session_id>/<lecture_id>', methods=['PUT'])
-    def update_lecture(session_id, lecture_id):
+    @blueprint.route('/<session_id>/<lecture_key>', methods=['PUT'])
+    def update_lecture(session_id, lecture_key):
         """
         Update a lecture
         
@@ -159,9 +159,10 @@ def init_lecture_routes(lecture_service):
             data.pop('lecturerId', None)
             data.pop('createdAt', None)
             data.pop('_id', None)
+            data.pop('key', None)
             data.pop('id', None)
             
-            lecture = lecture_service.update_lecture(session_id, lecture_id, data)
+            lecture = lecture_service.update_lecture(session_id, lecture_key, data)
             
             if not lecture:
                 return jsonify({
@@ -186,8 +187,8 @@ def init_lecture_routes(lecture_service):
                 'message': 'Failed to update lecture'
             }), 500
     
-    @blueprint.route('/<session_id>/<lecture_id>', methods=['DELETE'])
-    def delete_lecture(session_id, lecture_id):
+    @blueprint.route('/<session_id>/<lecture_key>', methods=['DELETE'])
+    def delete_lecture(session_id, lecture_key):
         """
         Delete a lecture
         
@@ -202,7 +203,7 @@ def init_lecture_routes(lecture_service):
                     'message': 'sessionId is required'
                 }), 400
             
-            success = lecture_service.delete_lecture(session_id, lecture_id)
+            success = lecture_service.delete_lecture(session_id, lecture_key)
             
             if not success:
                 return jsonify({
@@ -222,8 +223,8 @@ def init_lecture_routes(lecture_service):
                 'message': 'Failed to delete lecture'
             }), 500
     
-    @blueprint.route('/<session_id>/<lecture_id>/day/<day_id>', methods=['PUT'])
-    def update_lecture_day(session_id, lecture_id, day_id):
+    @blueprint.route('/<session_id>/<lecture_key>/day/<day_id>', methods=['PUT'])
+    def update_lecture_day(session_id, lecture_key, day_id):
         """
         Update a specific lecture day
         
@@ -242,7 +243,7 @@ def init_lecture_routes(lecture_service):
         try:
             data = request.get_json()
             
-            lecture = lecture_service.update_lecture_day(session_id, lecture_id, day_id, data)
+            lecture = lecture_service.update_lecture_day(session_id, lecture_key, day_id, data)
             
             if not lecture:
                 return jsonify({
@@ -269,8 +270,8 @@ def init_lecture_routes(lecture_service):
     
     # ==================== QUESTION ENDPOINTS ====================
     
-    @blueprint.route('/<lecture_id>/questions', methods=['POST'])
-    def create_question(lecture_id):
+    @blueprint.route('/<lecture_key>/questions', methods=['POST'])
+    def create_question(lecture_key):
         """
         Create a student question
         
@@ -291,7 +292,7 @@ def init_lecture_routes(lecture_service):
                 }), 400
             
             question = lecture_service.create_question(
-                lecture_id=lecture_id,
+                lecture_key=lecture_key,
                 student_name=data['studentName'],
                 question_text=data['question']
             )
@@ -308,13 +309,13 @@ def init_lecture_routes(lecture_service):
                 'message': 'Failed to create question'
             }), 500
     
-    @blueprint.route('/<session_id>/<lecture_id>/questions', methods=['GET'])
-    def get_lecture_questions(session_id, lecture_id):
+    @blueprint.route('/<session_id>/<lecture_key>/questions', methods=['GET'])
+    def get_lecture_questions(session_id, lecture_key):
         """
         Get all questions for a lecture
         """
         try:
-            questions = lecture_service.get_questions_by_lecture(session_id, lecture_id)
+            questions = lecture_service.get_questions_by_lecture(session_id, lecture_key)
             
             return jsonify({
                 'success': True,
@@ -327,6 +328,24 @@ def init_lecture_routes(lecture_service):
                 'success': False,
                 'message': 'Failed to fetch questions'
             }), 500
+
+    @blueprint.route('/<session_id>/<lecture_key>/questions/next', methods=['GET'])
+    def get_next_lecture_question(session_id, lecture_key):
+        try:
+            question = lecture_service.get_next_question_for_lecture(session_id, lecture_key)
+
+            return jsonify({
+                'success': True,
+                'question': question  # will be null/None if no question available
+            }), 200
+
+        except Exception as e:
+            logger.error(f"Error fetching next question: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': 'Failed to fetch next question'
+            }), 500
+
     
     @blueprint.route('/lecturer/<session_id>/questions/unanswered/count', methods=['GET'])
     def get_unanswered_count(session_id):
@@ -375,3 +394,6 @@ def init_lecture_routes(lecture_service):
             }), 500
     
     return blueprint
+
+
+

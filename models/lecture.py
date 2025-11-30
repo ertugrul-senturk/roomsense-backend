@@ -5,16 +5,16 @@ MongoDB schema for lectures
 from datetime import datetime
 from bson import ObjectId
 
-
 class Lecture:
     """Lecture model with validation"""
     
     @staticmethod
-    def create(lecturer_id, course_name, semester_start, semester_end, class_sessions, lecture_days):
+    def create(key, lecturer_id, course_name, semester_start, semester_end, class_sessions, lecture_days):
         """
         Create a new lecture document
         
         Args:
+            key (str): The key of the lecture
             lecturer_id: MongoDB ObjectId of the lecturer
             course_name: Name of the course
             semester_start: Start date (YYYY-MM-DD)
@@ -26,6 +26,7 @@ class Lecture:
             Dictionary representing a lecture document
         """
         return {
+            'key': key,
             'lecturerId': lecturer_id,
             'courseName': course_name,
             'semesterStartDate': semester_start,
@@ -83,49 +84,57 @@ class Lecture:
         return lecture_copy
 
 
+
+
 class StudentQuestion:
     """Student Question model"""
-    
+
     @staticmethod
-    def create(lecture_id, student_name, question):
+    def create(lecture_key, student_name, question):
         """
         Create a new student question document
-        
+
         Args:
-            lecture_id: MongoDB ObjectId of the lecture
+            lecture_key: Lecture key
             student_name: Name of the student
             question: Question text
-            
+
         Returns:
             Dictionary representing a question document
         """
         return {
-            'lectureId': lecture_id,
+            'lectureKey': lecture_key,
             'studentName': student_name,
             'question': question,
             'isAnswered': False,
-            'createdAt': datetime.utcnow()
+            'createdAt': datetime.utcnow(),
+            # new fields for advanced polling logic
+            'isDelivered': False,
+            'deliveredAt': None
         }
-    
+
     @staticmethod
     def to_json(question):
         """Convert question document to JSON-serializable format"""
         if question is None:
             return None
-        
+
         question_copy = question.copy()
-        
+
         # Convert ObjectId to string
         if '_id' in question_copy:
             question_copy['id'] = str(question_copy['_id'])
             del question_copy['_id']
-        
+
         # Convert lectureId to string if it's ObjectId
         if 'lectureId' in question_copy and isinstance(question_copy['lectureId'], ObjectId):
             question_copy['lectureId'] = str(question_copy['lectureId'])
-        
+
         # Convert datetime to ISO format
-        if 'createdAt' in question_copy:
+        if 'createdAt' in question_copy and isinstance(question_copy['createdAt'], datetime):
             question_copy['createdAt'] = question_copy['createdAt'].isoformat()
-        
+
+        if 'deliveredAt' in question_copy and isinstance(question_copy['deliveredAt'], datetime):
+            question_copy['deliveredAt'] = question_copy['deliveredAt'].isoformat()
+
         return question_copy
