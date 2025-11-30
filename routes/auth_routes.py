@@ -12,6 +12,56 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 def init_auth_routes(auth_service):
     """Initialize auth routes with service dependency"""
 
+    @auth_bp.route('/options')
+    def get_options():
+        """Get user data by session id"""
+        session_id = request.args.get('sessionId')
+        try:
+            if not session_id:
+                return jsonify({
+                    'success': False,
+                    'message': 'Session id is required'
+                }), 400
+
+            result = auth_service.get_user(session_id)
+
+            if result['options']:
+                return jsonify(result['options']), 200
+            else:
+                return jsonify(result), 400
+
+        except Exception as e:
+            logger.error(f"Options cannot be retrieved error: {str(e)}")
+            return jsonify({
+                'message': 'Options cannot be retrieved'
+            }), 500
+
+    @auth_bp.route('/options', methods=['POST'])
+    def save_options():
+        try:
+            session_id = request.args.get('sessionId')
+            data = request.get_json()
+
+            if not session_id:
+                return jsonify({
+                    'success': False,
+                    'message': 'SessionId is required'
+                }), 400
+
+            result = auth_service.save_options(session_id, data)
+
+            if result['success']:
+                return jsonify(result), 200
+            else:
+                return jsonify(result), 400
+
+        except Exception as e:
+            logger.error(f"Options cannot be saved error: {str(e)}")
+            return jsonify({
+                'message': 'Options cannot be saved'
+            }), 500
+
+
     @auth_bp.route('/login', methods=['POST'])
     def login():
         """
@@ -37,6 +87,47 @@ def init_auth_routes(auth_service):
             else:
                 return jsonify(result), 400
                 
+        except Exception as e:
+            logger.error(f"Login error: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': 'Login failed'
+            }), 500
+
+
+
+        except Exception as e:
+            logger.error(f"Login error: {str(e)}")
+            return jsonify({
+                'success': False,
+                'message': 'Login failed'
+            }), 500
+
+    @auth_bp.route('/authorize', methods=['POST'])
+    def authorize():
+        """
+        Initiate login process by sending verification email
+        POST /auth/login
+        Body: {"email": "user@example.com"}
+        """
+        try:
+            data = request.get_json()
+            session_id = data.get('sessionId')
+            ar_session_id = data.get('arSessionId')
+
+            if not session_id or not ar_session_id:
+                return jsonify({
+                    'success': False,
+                    'message': 'Session id and arSessionId is required'
+                }), 400
+
+            result = auth_service.authorize(session_id, ar_session_id)
+
+            if result['success']:
+                return jsonify(result), 200
+            else:
+                return jsonify(result), 400
+
         except Exception as e:
             logger.error(f"Login error: {str(e)}")
             return jsonify({

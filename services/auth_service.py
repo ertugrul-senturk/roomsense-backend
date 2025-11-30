@@ -23,7 +23,7 @@ class AuthService:
         # Check if user exists
         user = User.find_by_email(self.db, email)
         if not user:
-            user = User.create(self.db, email, )
+            user = User.create(self.db, email)
         user.get("pendingSessionIds", []).append(session_id)
         User.update_user(self.db, user)
 
@@ -50,6 +50,50 @@ class AuthService:
                 'success': False,
                 'message': 'Failed to send verification email. Please try again.'
             }
+
+    def get_user(self, session_id):
+        session_id = session_id.strip()
+        user =  User.find_by_active_session(self.db, session_id)
+        if not user:
+            return {'message': 'No user found',
+                    'success': False}
+        return {
+            'success': True,
+            'email': user['email'],
+            'options': user['options']
+        }
+
+    def save_options(self, session_id, data):
+        session_id = session_id.strip()
+        user = User.find_by_active_session(self.db, session_id)
+        if not user:
+            return {'message': 'No user found',
+                    'success': False}
+
+        user['options'] = data
+        User.update_user(self.db, user)
+        return {
+            'success': True
+        }
+
+
+    def authorize(self, session_id, ar_session_id):
+        session_id = session_id.strip()
+        ar_session_id = ar_session_id.strip()
+
+        # Check if user exists
+        user = User.find_by_active_session(self.db, session_id)
+        if not user:
+            return {
+                'success': False,
+                'message': 'Given session id was not active.'
+            }
+        user.get("activeSessionIds", []).append(ar_session_id)
+        User.update_user(self.db, user)
+        return {
+            'success': True,
+            'message': 'AR session was authorized.',
+        }
 
     def verify_email(self, session_id):
 

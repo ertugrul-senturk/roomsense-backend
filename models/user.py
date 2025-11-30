@@ -27,7 +27,14 @@ class User:
             'createdAt': datetime.utcnow(),
             'activeSessionIds': [],
             'pendingSessionIds': [],
-            'inactiveSessionIds': []
+            'inactiveSessionIds': [],
+            'options': {
+                'name': 'Lecturer',
+                'individualEngagement': True,
+                'acceptQueries': True,
+                'displayTimeline': True,
+                'displayNotes': True
+            }
         }
 
         result = db.users.insert_one(user_document)
